@@ -1,0 +1,186 @@
+{
+	"dag": {
+		"node-1724337034985": {
+			"database": "demo",
+			"table": "demoupdatedfolder3327",
+			"runtimeParameters": [],
+			"isCatalog": true,
+			"name": "Amazon S3",
+			"classification": "DataSource",
+			"type": "S3",
+			"inputs": [],
+			"generatedNodeName": "AmazonS3_node1724337034985",
+			"codeGenVersion": 2,
+			"outputSchemas": [
+				[
+					{
+						"key": "location",
+						"fullPath": [
+							"location"
+						],
+						"type": "string"
+					},
+					{
+						"key": "total_sqft",
+						"fullPath": [
+							"total_sqft"
+						],
+						"type": "double"
+					},
+					{
+						"key": "bath",
+						"fullPath": [
+							"bath"
+						],
+						"type": "long"
+					},
+					{
+						"key": "price",
+						"fullPath": [
+							"price"
+						],
+						"type": "double"
+					},
+					{
+						"key": "bhk",
+						"fullPath": [
+							"bhk"
+						],
+						"type": "long"
+					}
+				]
+			]
+		},
+		"node-1724337338731": {
+			"classification": "DataSink",
+			"type": "AmazonRedshift",
+			"name": "Amazon Redshift",
+			"inputs": [
+				"node-1724337034985"
+			],
+			"data": {
+				"accessType": "connection",
+				"sourceType": "table",
+				"action": "merge",
+				"mergeAction": "simple",
+				"mergeWhenMatched": "update",
+				"mergeWhenNotMatched": "insert",
+				"upsert": true,
+				"selectedColumns": [
+					{
+						"value": "location",
+						"label": "location",
+						"description": "VARCHAR"
+					},
+					{
+						"value": "total_sqft",
+						"label": "total_sqft",
+						"description": "DOUBLE PRECISION"
+					},
+					{
+						"value": "bath",
+						"label": "bath",
+						"description": "BIGINT"
+					},
+					{
+						"value": "price",
+						"label": "price",
+						"description": "DOUBLE PRECISION"
+					},
+					{
+						"value": "bhk",
+						"label": "bhk",
+						"description": "BIGINT"
+					}
+				],
+				"tableSchema": [
+					{
+						"value": "location",
+						"label": "location",
+						"description": "VARCHAR"
+					},
+					{
+						"value": "total_sqft",
+						"label": "total_sqft",
+						"description": "DOUBLE PRECISION"
+					},
+					{
+						"value": "bath",
+						"label": "bath",
+						"description": "BIGINT"
+					},
+					{
+						"value": "price",
+						"label": "price",
+						"description": "DOUBLE PRECISION"
+					},
+					{
+						"value": "bhk",
+						"label": "bhk",
+						"description": "BIGINT"
+					}
+				],
+				"tempDir": "s3://aws-glue-assets-506572490930-ap-south-1/temporary/",
+				"advancedOptions": [],
+				"connection": {
+					"label": "Redshift connection",
+					"value": "Redshift connection",
+					"description": "-"
+				},
+				"schema": {
+					"label": "public",
+					"value": "public"
+				},
+				"table": {
+					"label": "realestate",
+					"value": "realestate",
+					"description": "public"
+				},
+				"stagingTable": "public.realestate_temp_kuqdy2",
+				"catalogDatabase": {
+					"label": "demo",
+					"value": "demo",
+					"description": "-"
+				}
+			},
+			"generatedNodeName": "AmazonRedshift_node1724337338731",
+			"codeGenVersion": 2
+		}
+	},
+	"jobConfig": {
+		"command": "glueetl",
+		"description": "",
+		"role": "arn:aws:iam::506572490930:role/my-glue",
+		"scriptName": "Untitledjob.py",
+		"version": "4.0",
+		"language": "python-3",
+		"scriptLocation": "s3://aws-glue-assets-506572490930-ap-south-1/scripts/",
+		"temporaryDirectory": "s3://aws-glue-assets-506572490930-ap-south-1/temporary/",
+		"timeout": 2880,
+		"maxConcurrentRuns": 1,
+		"workerType": "G.1X",
+		"numberOfWorkers": 10,
+		"maxRetries": 0,
+		"metrics": true,
+		"observabilityMetrics": true,
+		"security": "none",
+		"bookmark": "job-bookmark-disable",
+		"logging": true,
+		"spark": true,
+		"sparkConfiguration": "standard",
+		"sparkPath": "s3://aws-glue-assets-506572490930-ap-south-1/sparkHistoryLogs/",
+		"serverEncryption": false,
+		"glueHiveMetastore": true,
+		"etlAutoScaling": false,
+		"etlAutoTuning": false,
+		"jobParameters": [],
+		"tags": [],
+		"connectionsList": [],
+		"jobMode": "DEVELOPER_MODE",
+		"name": "Untitledjob",
+		"pythonPath": ""
+	},
+	"hasBeenSaved": false,
+	"redshift-s3-select": "s3://aws-glue-assets-506572490930-ap-south-1/temporary/",
+	"script": "import sys\nfrom awsglue.transforms import *\nfrom awsglue.utils import getResolvedOptions\nfrom pyspark.context import SparkContext\nfrom awsglue.context import GlueContext\nfrom awsglue.job import Job\nfrom awsglue import DynamicFrame\n\nargs = getResolvedOptions(sys.argv, ['JOB_NAME'])\nsc = SparkContext()\nglueContext = GlueContext(sc)\nspark = glueContext.spark_session\njob = Job(glueContext)\njob.init(args['JOB_NAME'], args)\n\n# Script generated for node Amazon S3\nAmazonS3_node1724337034985 = glueContext.create_dynamic_frame.from_catalog(database=\"demo\", table_name=\"demoupdatedfolder3327\", transformation_ctx=\"AmazonS3_node1724337034985\")\n\n# Script generated for node Amazon Redshift\nAmazonRedshift_node1724337338731 = glueContext.write_dynamic_frame.from_options(frame=AmazonS3_node1724337034985, connection_type=\"redshift\", connection_options={\"redshiftTmpDir\": \"s3://aws-glue-assets-506572490930-ap-south-1/temporary/\", \"useConnectionProperties\": \"true\", \"dbtable\": \"public.realestate\", \"connectionName\": \"Redshift connection\", \"preactions\": \"CREATE TABLE IF NOT EXISTS public.realestate (location VARCHAR, total_sqft DOUBLE PRECISION, bath BIGINT, price DOUBLE PRECISION, bhk BIGINT);\"}, transformation_ctx=\"AmazonRedshift_node1724337338731\")\n\njob.commit()"
+}

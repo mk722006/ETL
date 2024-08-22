@@ -1,0 +1,43 @@
+{
+	"jobConfig": {
+		"name": "trans_job",
+		"description": "",
+		"role": "arn:aws:iam::506572490930:role/my-glue",
+		"command": "pythonshell",
+		"version": "3.0",
+		"runtime": null,
+		"workerType": null,
+		"numberOfWorkers": null,
+		"maxCapacity": 0.0625,
+		"jobRunQueuingEnabled": false,
+		"maxRetries": 0,
+		"timeout": 2880,
+		"maxConcurrentRuns": 1,
+		"security": "none",
+		"scriptName": "trans_job.py",
+		"scriptLocation": "s3://aws-glue-assets-506572490930-ap-south-1/scripts/",
+		"language": "python-3.9",
+		"spark": false,
+		"jobParameters": [],
+		"tags": [],
+		"jobMode": "DEVELOPER_MODE",
+		"createdOn": "2024-08-21T15:02:57.986Z",
+		"developerMode": true,
+		"connectionsList": [],
+		"temporaryDirectory": "s3://aws-glue-assets-506572490930-ap-south-1/temporary/",
+		"glueHiveMetastore": true,
+		"etlAutoTuning": false,
+		"observabilityMetrics": false,
+		"pythonShellPrebuiltLibraryOption": "analytics",
+		"flexExecution": false,
+		"minFlexWorkers": null,
+		"sourceControlDetails": {
+			"Provider": "GITHUB",
+			"Folder": "https://github.com/mk722006/ETL.git"
+		},
+		"maintenanceWindow": null
+	},
+	"hasBeenSaved": false,
+	"usageProfileName": null,
+	"script": "import boto3\r\nimport pandas as pd\r\nimport re\r\nfrom io import StringIO\r\n\r\ndef read_from_s3(bucket_name, s3_key):\r\n    \"\"\"Read data from S3 bucket.\"\"\"\r\n    s3_client = boto3.client('s3')\r\n    response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)\r\n    data = response['Body'].read().decode('utf-8')\r\n    return StringIO(data)\r\n\r\ndef validate_headers(df, expected_headers):\r\n    \"\"\"Validate if the DataFrame headers match the expected headers.\"\"\"\r\n    if list(df.columns) != expected_headers:\r\n        raise ValueError(\"Headers do not match the expected headers.\")\r\n\r\ndef validate_data(df):\r\n    \"\"\"Perform data validation.\"\"\"\r\n    # Replace NaN values with empty strings\r\n    df.fillna('', inplace=True)\r\n\r\n    # Example: Regex validation for special characters in the 'location' column\r\n    df['location'] = df['location'].apply(lambda x: re.sub(r'[^a-zA-Z0-9\\s]', '', x))\r\n\r\n    return df\r\n\r\ndef write_to_s3(bucket_name, key, df):\r\n    \"\"\"Write DataFrame to S3 bucket as CSV.\"\"\"\r\n    s3_client = boto3.client('s3')\r\n    csv_buffer = StringIO()\r\n    df.to_csv(csv_buffer, index=False)\r\n    s3_client.put_object(Bucket=bucket_name, Key=key, Body=csv_buffer.getvalue())\r\n\r\ndef main():\r\n    # S3 Bucket and Key\r\n    input_bucket_name = 'rawfolder3327'\r\n    input_s3_key = 'data.csv'\r\n    output_bucket_name = 'updatedfolder3327'\r\n    output_s3_key = 'updated_data.csv'\r\n    \r\n    # Read CSV data from S3\r\n    csv_file_content = read_from_s3(input_bucket_name, input_s3_key)\r\n    \r\n    # Read CSV into DataFrame\r\n    df = pd.read_csv(csv_file_content)\r\n    \r\n    # Expected headers\r\n    expected_headers = [\"location\", \"total_sqft\", \"bath\", \"price\", \"bhk\"]\r\n    \r\n    # Validate headers\r\n    validate_headers(df, expected_headers)\r\n    \r\n    # Validate data\r\n    df = validate_data(df)\r\n    \r\n    # Write updated CSV to S3\r\n    write_to_s3(output_bucket_name, output_s3_key, df)\r\n\r\nif __name__ == \"__main__\":\r\n    main()\r\n"
+}
