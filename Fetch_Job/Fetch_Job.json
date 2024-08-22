@@ -1,0 +1,34 @@
+{
+  "name" : "Fetch_Job",
+  "jobMode" : "SCRIPT",
+  "description" : "",
+  "role" : "arn:aws:iam::506572490930:role/my-glue",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "pythonshell",
+    "scriptLocation" : "s3://aws-glue-assets-506572490930-ap-south-1/scripts/Fetch_Job.py",
+    "pythonVersion" : "3.9"
+  },
+  "defaultArguments" : {
+    "--enable-job-insights" : "false",
+    "--job-language" : "python",
+    "--TempDir" : "s3://aws-glue-assets-506572490930-ap-south-1/temporary/",
+    "--enable-observability-metrics" : "false",
+    "--enable-glue-datacatalog" : "true",
+    "library-set" : "analytics"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 0,
+  "timeout" : 2880,
+  "maxCapacity" : 0.0625,
+  "glueVersion" : "3.0",
+  "executionClass" : "STANDARD",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "ETL",
+    "branch" : "main",
+    "folder" : "Fetch_Job"
+  }
+}
